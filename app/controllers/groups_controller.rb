@@ -22,6 +22,7 @@ class GroupsController < ApplicationController
   def create
     @group=current_user.groups.new(group_params)
     if @group.save
+      current_user.join!(@group)
       redirect_to groups_path, notice: 'Added successfully!'
     else
       render :new
@@ -45,5 +46,30 @@ class GroupsController < ApplicationController
 
   def group_params
     params.require(:group).permit(:title, :description)
+  end
+
+
+  def join
+    @group=Group.find(params[:id])
+
+    if !current_user.is_member_of?(@group)
+      current_user.join!(@group)
+      flash[:notice]="Successfully joined!"
+    else
+      flash[:notice]="You have already join"
+    end
+    redirect_to groups_path(@group)
+  end
+
+  def quit
+    @group=Group.find(params[:id])
+
+    if current_user.is_member_of?(@group)
+      current_user.quit!(@group)
+      flash[:notice]="Successful exits.";
+    else
+      flash[:alert]="Did not join!";
+    end
+    redirect_to groups_path(@group)
   end
 end

@@ -2,6 +2,14 @@ class PostsController < ApplicationController
 
   before_action :authenticate_user!
   before_action :find_group
+  before_action :member_required, only: [:new, :create]
+
+  def member_required
+    if !current_user.is_member_of?(@group)
+      flash[:warning]="Your not member."
+      redirect_to group_path(@group)
+    end
+  end
 
   def new
     @post = @group.posts.new
